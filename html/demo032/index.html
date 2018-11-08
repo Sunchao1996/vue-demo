@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../../js/vue.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--<div id="app">-->
+    <!--&lt;!&ndash;<my-component v-bind:label="label" v-bind:class-name="'username-input'" v-model="value" placeholder="Enter username"></my-component>&ndash;&gt;-->
+    <!--&lt;!&ndash;<base-input v-bind:label="label" v-model="label" v-on:focus.native="onFocus" ></base-input>复杂template的时候.native失效&ndash;&gt;-->
+    <!--<base-input v-bind:label="label" v-model="label"  v-on:focus="onFocus" ></base-input>-->
+<!--</div>-->
+<!--<div id="app-1">-->
+    <!--<label>{{data1.title}}</label>-->
+    <!--&lt;!&ndash;<text-document v-bind:title="title" v-on:update:title="title = $event"></text-document>&ndash;&gt;-->
+    <!--&lt;!&ndash;<text-document v-bind:title="title" v-bind:title.sync="title = $event"></text-document>.sync和v-bind使用的时候=号后面不能是表达式&ndash;&gt;-->
+    <!--&lt;!&ndash;<text-document v-bind:title.sync="title"></text-document>类似于model&ndash;&gt;-->
+    <!--<text-document v-bind.sync="data1"></text-document>-->
+<!--</div>-->
+<!--<div id="example-slot">-->
+    <!--<navigation-link>111<input /></navigation-link>-->
+<!--</div>-->
+<!--<div id="example-slot2">-->
+    <!--<todo-list>-->
+        <!--&lt;!&ndash;slot-scope可以再认可元素上使用&ndash;&gt;-->
+        <!--<div slot-scope="slotProp">-->
+            <!--<span v-if="slotProp.td.isComplete">✓</span>-->
+            <!--{{slotProp.td.text}}-->
+        <!--</div>-->
+    <!--</todo-list>-->
+<!--</div>-->
+<!--<div id="example-ref">-->
+    <!--<base-input v-bind:label="'sss'" v-model="inputValue" v-on:btn-click="btnClick" ref="usernameInput"></base-input>-->
+<!--</div>-->
+<div id="example-template">
+    <base-template inline-template>
+        <input >
+    </base-template>
+</div>
+<script src="index.js"></script>
+</body>
+</html>

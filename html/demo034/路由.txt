@@ -1,0 +1,285 @@
+路由：
+1.例：
+    <div id="app">
+        <h1>Hello App!</h1>
+        <p>
+            //使用router-link组件来导航，通过传入 ’to‘属性指定链接  默认会渲染成一个a标签
+            <router-link to="/foo">Go to Foo</router-link>
+            <router-link to="/bar">Go to Bar</router-link>
+        </p>
+        //路由出口，路由匹配到的组件将渲染在这里
+        <router-view></router-view>
+    </div>
+
+    //0如果使用模块化机制编程，导入Vue和VueRouter,要调用Vue.use(VueRouter)
+
+    //1.定义（路由）组件，可以从其他文件import
+    const Foo = {template: `<div>foo</div>`};
+    const Bar = {template: `<div>bar</div>`};
+    //2.定义路由，每个路由应该映射一个组件。其中“component”可以是通过Vue.extend()创建的组件构造器，或者，只是一个组件配置对象
+    const routes = [
+        {path: '/foo', component: Foo},
+        {path: '/bar', component: Bar}
+    ];
+    //3.创建router实例，然后传路由配置
+    const router = new VueRouter({
+        routes:routes
+    });
+    //4.挂载到根节点
+    const app = new Vue({
+        el:'#app',
+        router
+    });
+2.动态路由匹配
+    根据规则，符合规则的所有路径将全都映射到同个组件。
+    例：
+        const User = {template: `<div>user{{$route.params.id}}</div>`};
+        const routes = [
+            {path: '/user/:id', component: User}
+        ];
+        <router-link to="/user/1">Go to User1</router-link>
+        <router-link to="/user/2">Go to User2</router-link>
+3.响应路由参数变化：多个路径映射到同一个组件的时候，组件会复用，所以，组件的生命周期钩子不会被调用。
+    例：
+        const Foo = {
+            template: `<div>foo</div>`, created: function () {
+                console.log('foo');
+            }
+        };
+        const Bar = {
+            template: `<div>bar</div>`, created: function () {
+                console.log('bar');
+            }
+        };
+        const User = {
+            template: `<div>user{{$route.params.id}}</div>`
+            , created: function () {
+                console.log('user{}', this.$route.params.id);
+            }
+        };
+        const routes = [
+            {path: '/foo', component: Foo},
+            {path: '/bar', component: Bar},
+            {path: '/user/:id', component: User},
+        ];
+        切换/foo到/bar到/foo，输出foo=>bar=>foo
+        切换/user/1到/user/2到/user/1，输出user1
+        如果要监听路由参数的变化方法如下：
+            方法一：watch($route){
+            }
+            例：
+                const User = {
+                    template: `<div>user{{$route.params.id}}</div>`
+                    , created: function () {
+                        console.log('user{}', this.$route.params.id);
+                    },watch:{
+                        '$route':function(to,from){
+                            console.log('watch route');
+                        }
+                    }
+                };
+            方法二：beforeRouteUpdate选项函数
+                beforeRouteUpdate:function(to,from,next){
+                    console.log('to'+to);
+                    console.log('from'+from);
+                    // next(false);//表示不进行跳转
+                    next();//表示继续跳转
+                }
+4.匹配模式：很多匹配模式https://github.com/pillarjs/path-to-regexp
+5.匹配优先级，如果存在一个路径有多个映射，则按照先后顺序，使用最开始的。
+6.嵌套路由：要注意，以 / 开头的嵌套路径会被当作根路径。 这让你充分的使用嵌套组件而无须设置嵌套的路径。
+    例：
+        {
+            path: '/user/:id', component: User, children: [
+                //访问/user/:id/profile的时候UserProfile会被添加到User的路由视图下
+                {path: 'profile',component:UserProfile},
+                //访问/user/:id/posts的时候UserPosts会被添加到User的路由视图下
+                {path: 'posts',component:UserPosts},
+                //如果不指定空路由的话访问/user/:id则不会发生变化
+                {path: '',component:UserHome}
+            ]
+        }
+7.编程式路由，<router-link :to="">此为声明式，编程式即为主动触发路由请求，如下：
+    注意：在 Vue 实例内部，你可以通过 $router 访问路由实例。因此你可以调用 this.$router.push/replace。
+    方式一，添加history的router.push(location,onComplete?,onAbort?):
+        这个方法会向history栈添加一个新的记录，所以当用户点击浏览器后退按钮时，则回到之前的URL。
+        点击 <router-link :to="..."> 等同于调用 router.push(...)。
+        使用：
+            //字符串表示路径
+            router.push('home');
+            //对象
+            router.push({path:'home'});
+            //路由名字+参数  名为router的路由路径为 /user/:userId  下行代码对应为/user/123
+            router.push({name:'router',params:{userId:123}});
+            //带参数的查询，相当于/home?userId=123
+            router.push({path:'home',query:{userId:123}});
+            问题:
+                使用path/<router-link :to>指明路径，如果要传参数则不可以使用params来进行传递，解决如下：
+                   const userId = 123;
+                   生效如下：
+                       router.push({name:'router',params:{userId}});
+                       router.push({path:'/user',query:{userId}});
+                       router.push({path:`/user/${userId}`});
+                   不生效如下：
+                       router.push({path:'/user',params:{userId}});
+    方式二：router.replace,与push唯一的不同就是，他不会向history添加新纪录，而是跟它的方法名一样---替换掉当前的history记录。
+    *参数：onComplete和onAbort回调作为第二个和第三个参数。这些回调将会在导航成功完成（所有的异步钩子被解析之后）或终止（导航到相同的路由、或在当前导航完成之前导航到另一个不用的路由）的时候进行调用。
+8.前进后退
+    router.go(n):n是一个整数，正整数或者负整数，意思是在history记录中向前或者向后退多少步，类似window.history.go(n)。
+9.命名路由
+    例：
+        {path: 'profile',component:UserProfile,name:'user'}
+        使用：
+            params表示占位符，与query产生的条件拼接结果不同
+            <router-link :to="{name:'user',params:{id:2}}">Go to User2</router-link>
+            router.push({name:'user',params:{id:1}});
+10.命名视图：给<router-view>添加name特性，指定名字，用于一个路由同时展示多个视图，没有name的视图视为默认视图。
+    例：
+        <router-view></router-view>
+        <router-view name="a"></router-view>
+        {path: '/foo', components: {default:Foo,a:Bar}}
+11.重定向和别名：
+    重定向：重定向不会触发导航守卫等钩子。
+         {path: '/foo', redirect:'/bar'}
+         {path:'/foo',redirect:{name:'user'}}
+         {path:'/foo',redirect:to => {
+            //方法接收目标路由作为参数
+            //return重定向的字符串路径/路径对象
+         }}
+    别名：
+        /a 的别名是 /b，意味着，当用户访问 /b 时，URL 会保持为 /b，但是路由匹配则为 /a，就像用户访问 /a 一样。
+        例：
+            {path: '/foo', alias:'/f'}
+            此处访问/f就相当于访问/foo一样
+12.路由组件传参：将路由路径中的参数传到对应的组件中，使用props实现
+    例：
+        路由：{path:'/user2/:id',component:User2,props:true}
+        组件：const User2 = {
+               props:['id'],
+               template:`<div>User {{id}}</div>`
+             };
+        当访问/user2/1时，1会被当做id作为组件的特性传给组件
+        当路由视图使用name名字来区分的时候，应对每个视图指定是否需要使用props传参：
+            {path:'/user3/:id',components:{default:User2,a:User2},props:{default:true,a:false}}
+            如果指定值为false则还需要通过this.$router.params来获取参数
+        props的几种赋值方式除以上布尔之外如下：
+            //针对于只有一个视图渲染的情况，props是个对象，此对象会被作为组件的属性传给组件
+            {path:'/user4/:id',component:User2,props:{id:2}},
+            //针对在只有一个视图渲染的情况，props接收一个函数，将返回值作为对象传给组件
+            {path:'/user5/:id',component:User2,props:route =>{return {id:route.params.id}}}
+13.浏览器路径改变
+    vue-router 默认 hash 模式 —— 使用 URL 的 hash 来模拟一个完整的 URL，于是当 URL 改变时，页面不会重新加载。
+    如果不想要很丑的 hash，我们可以用路由的 history 模式，这种模式充分利用 history.pushState API 来完成 URL 跳转而无须重新加载页面。
+    const router = new VueRouter({
+        mode:'history',
+        routes: routes
+    });
+    问题：
+        如果用户通过浏览器访问了一个不存在的页面，则应该指定一个统一的界面展示，
+        具体的解决方案如下：
+            1.nginx
+              location / {
+                try_files $uri $uri/ /index.html;
+              }
+            2.const router = new VueRouter({
+                mode: 'history',
+                routes: [
+                  { path: '*', component: NotFoundComponent }
+                ]
+              })
+            3.SSR服务端渲染。
+14.导航守卫：导航即表示路由正在发生改变，vue-router提供的导航守卫主要用来通过跳转或取消的方式守卫导航。
+    守卫是异步执行的，此时导航在所有守卫resolve完之前一直处于等待中。
+    守卫植入方式：全局的、单个路由独享的、组件级的。
+    注意：参数或查询的改变并不会触发进入/离开的导航守卫。
+         如果想要检测参数或查询的改变可以通过监听$route对象或者通过组件内守卫beforeRouteUpdate来监听。
+    全局守卫：
+         例：
+            //全局守卫，可以有多个，调用顺序为创建顺序
+            router.beforeEach(function(to,from ,next){
+               //要确保next方法被调用，否则钩子不会被resolved
+               console.log('Router BeforeEach');
+               next();
+            });
+         守卫参数说明：
+            to:将要进入的目标路由对象
+            from：当前导航正要离开的路由
+            next:Function:一定要调用该方法来resolve这个钩子。执行效果依赖next()方法的调用参数：
+                next()：进行管道中的下一个钩子。如果全部钩子执行完了，则导航的状态就是confirmed(确认的).
+                next(false):中断当前的导航。如果浏览器的URL改变了（可能是用户手动或者浏览器后退按钮）那么URL地址会重置到from路由对应的地址。
+                next('/')或者next({path:'/'}):跳转到一个不同的地址。当前的导航被中断，然后进行一个新的导航。你可以向next传递任意位置对象，且允许设置注入replace:true,name:'home'之类的选项以及任何用在router-link的to prop或router.push中的选项。
+                next(error):如果传入next的参数是一个Error实例，则导航会被终止且该错误会被传递给router.onError注册过的回调。
+    全局解析守卫：在所有组件内守卫和异步路由组件被解析之后，解析守卫被调用，即在各个守卫之后被调用。在组件内守卫beforeRouteEnter之后调用。
+        例：
+            router.beforeResolve(function(to,from,next){
+               console.log('resolve router');
+               next();
+            });
+    全局后置钩子：这些钩子在导航之后被调用，不接受next属性，不会改变导航本身
+        例：
+            router.afterEach(function(to,from){
+                console.log('afterEach');
+            });
+    路由独享守卫：作用和全局前置守卫一样
+        例：
+            {
+                path: '/bar', component: Bar, beforeEnter: function (to, from, next) {
+                    console.log('/bar');
+                    next();
+                }
+            }
+    组件内守卫：
+        beforeRouteEnter(to,from,next):在渲染该组件的对应路由被confirm前调用，不能获取组件的实例this，因为当守卫执行前，组件还没有被创建
+            例：
+                const Foo = {
+                    template: `<div>foo</div>`, created: function () {
+                        console.log('foo');
+                    },
+                    beforeRouteEnter:function(to,from,next){
+                        console.log('Foo beforeRouteEnter');
+                        next();
+                    }
+                };
+            虽然不能再beforeRouteEnter中使用this，但是可以通过指定回调传给next来使用组件对象，仅适用于beforeRouteEnter:
+            例：
+                 beforeRouteEnter: function (to, from, next) {
+                    console.log('Foo beforeRouteEnter');
+                    next(vm => {
+                        console.log('beforeRouteEnter Callback'+vm.a);
+                    });
+                }
+        *beforeRouteUpdate(to,from,next):只有在当前路由被改变时但是该组件被复用时调用，其余守卫在组件被复用的时候不会被调用。可以访问this
+            例：
+                beforeRouteUpdate: function (to, from, next) {
+                    //此时的this表示前一个路由组件对象
+                    console.log('User '+this.$route.params.id);
+                    console.log('to' + to);
+                    console.log('from' + from);
+                    // next(false);//表示不进行跳转
+                    next();//表示继续跳转
+                }
+        beforeRouteLeave(to,from,next):离开该组件的时候调用，可以访问this，通常用来禁止用户在还未保存修改前突然离开。
+            例：
+                beforeRouteLeave:function(to,from,next){
+                    //此时this也表示前一个路由组件
+                    console.log('USER LEAVE'+this.$route.params.id);
+                    next();
+                }
+    完整的导航解析流程
+        导航被触发。
+        在失活的组件里调用离开守卫。
+        调用全局的 beforeEach 守卫。
+        在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+        在路由配置里调用 beforeEnter。
+        解析异步路由组件。
+        在被激活的组件里调用 beforeRouteEnter。
+        调用全局的 beforeResolve 守卫 (2.5+)。
+        导航被确认。
+        调用全局的 afterEach 钩子。
+        触发 DOM 更新。
+        用创建好的实例调用 beforeRouteEnter 守卫中传给 next 的回调函数。
+15.数据获取：https://router.vuejs.org/zh/guide/advanced/data-fetching.html
+    方式一：在组件的created中获取。
+    方式二：在组件内的前置守卫获取。
+16.滚动行为：路由切换后可以指定滚动条的位置。https://router.vuejs.org/zh/guide/advanced/scroll-behavior.html
+17.路由懒加载：即路由到的组件为异步组件。https://router.vuejs.org/zh/guide/advanced/lazy-loading.html
