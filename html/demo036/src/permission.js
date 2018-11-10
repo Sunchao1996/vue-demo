@@ -44,6 +44,7 @@ router.beforeEach((to, from, next) => {
         // 没有动态改变权限的需求可直接next() 删除下方权限判断 ↓
         const roles = store.getters.roles;
         const resources = store.getters.resources;
+        console.log(resources);
         if (hasPermission({roles, resources}, to)) {
           next()
         } else {

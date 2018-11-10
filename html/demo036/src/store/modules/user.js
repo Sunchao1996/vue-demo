@@ -43,7 +43,7 @@ const user = {
       state.roles = roles
     },
     SET_RESOURCES: (state, resources) => {
-      state.resouerces = resources;
+      state.resources = resources;
     }
   },
 
