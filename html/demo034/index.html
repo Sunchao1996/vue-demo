@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/vue-router.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <h1>Hello App!</h1>
+    <p>
+        <router-link to="/foo">Go to Foo</router-link>
+        <router-link to="/bar">Go to Bar</router-link>
+        <router-link to="/user/1/posts">Go to User1</router-link>
+        <router-link to="/user/2/profile">Go to User2</router-link>
+        <router-link :to="{name:'user',params:{id:2}}">Go to User2</router-link>
+    </p>
+    <router-view></router-view>
+    <router-view name="a"></router-view>
+</div>
+<script src="index.js"></script>
+</body>
+</html>

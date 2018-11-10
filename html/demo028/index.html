@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="../../js/vue.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app-28">
+    <!--<ul v-for="item in items">-->
+    <!--<li>{{item.text}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="(item,index) in items">-->
+    <!--<li>{{parentMessage}}-{{index}}-{{item.message}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="(item,index) of items">-->
+    <!--<li>{{parentMessage}}-{{index}}-{{item.message}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="value in object">-->
+    <!--<li>{{value}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="(value,key) of object">-->
+    <!--<li>{{key}}-{{value}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="(value,key,index) of object">-->
+    <!--<li >{{key}}-{{index}}-{{value}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="item of items">-->
+    <!--<li :key="item.id">{{item.message}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="number in numbers">-->
+    <!--<li>{{number}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="n in computedNumbers">-->
+    <!--<li>{{n}}</li>-->
+    <!--</ul>-->
+    <!--<ul v-for="n in even(numbers)">-->
+    <!--<li>{{n}}</li>-->
+    <!--</ul>-->
+    <!--<span v-for="n in 10">{{n}}</span>-->
+    <!--<ul >-->
+    <!--<template v-for="item in items1">-->
+    <!--<li>{{item.message}}</li>-->
+    <!--<li  class="divider" role="presentation"></li>-->
+    <!--</template>-->
+    <!--</ul>-->
+    <ul>
+        <li v-for="todo in todos" v-if="!todo.isComplete">
+            {{todo}}
+        </li>
+    </ul>
+    <ul v-if="todos.length">
+        <li v-for="todo in todos">
+            {{todo}}
+        </li>
+    </ul>
+    <p v-else>
+        No todos left!
+    </p>
+</div>
+<script src="index.js"></script>
+</body>
+</html>

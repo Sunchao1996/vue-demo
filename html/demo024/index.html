@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="../../js/vue.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--<div class="static" v-bind:class="{active:isActive,'text-danger':hasError}">111</div>-->
+<!--<div v-bind:class="classObject">222</div>-->
+<!--<div v-bind:class="classObject">333</div>-->
+<!--<div v-bind:class="[activeClass,errorClass]">4</div>-->
+<!--<div v-bind:class="[isActive?activeClass:'',errorClass]">5</div>-->
+<div v-bind:class="[{active:isActive},errorClass]">6</div>
+<script src="index.js"></script>
+</body>
+</html>

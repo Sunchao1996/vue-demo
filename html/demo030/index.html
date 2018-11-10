@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="../../js/vue.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="example-1">
+    <!--v-model 会忽略所有表单元素的 value、checked、selected 特性的初始值而总是将 Vue 实例的数据作为数据来源。
+    你应该通过 JavaScript 在组件的 data 选项中声明初始值。-->
+    <input v-model="message" placeholder="edit me"/>
+    <p>Message is {{message}}</p>
+</div>
+<div id="example-2">
+    <textarea v-model="message" placeholder="edit me"></textarea>
+</div>
+<div id="example-3">
+    <input type="checkbox" id="checkbox" v-model="checked">
+    <label for="checkbox">{{checked}}</label>
+</div>
+<div id="example-4">
+    <input type="checkbox" id="jack" value="Jack" v-model="checkedNames"/>
+    <label for="jack">Jack</label>
+    <input type="checkbox" id="john" value="John" v-model="checkedNames"/>
+    <label for="john">John</label>
+    <input type="checkbox" id="mike" value="Mike" v-model="checkedNames"/>
+    <label for="mike">Mike</label>
+    <p>ChedkedNames:{{checkedNames}}</p>
+</div>
+<div id="example-5">
+    <input type="radio" id="One" value="One" v-model="picked"/>
+    <label for="One">One</label>
+    <br>
+    <input type="radio" id="Two" value="Two" v-model="picked"/>
+    <label for="Two">Two</label>
+    <br>
+    <p>{{picked}}</p>
+</div>
+<div id="example-6">
+    <select v-model="selected">
+        <option disabled value="">请选择</option>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+    </select>
+    <br>
+    <p>{{selected}}</p>
+</div>
+<div id="example-7">
+    <select v-model="selected" multiple>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+    </select>
+    <br>
+    <p>selected:{{selected}}</p>
+</div>
+<hr>
+<div id="example-8">
+    <select v-model="selected">
+        <option v-for="o in options" v-bind:key="o.value" v-bind:value="o.value">
+            {{o.message}}
+        </option>
+    </select>
+</div>
+<div id="example-9">
+    <!--下面一行为复选框，选中的话提交值是yes，没选中的话不提交，也就是说始终提交的是yes-->
+    <input type="checkbox" true-value="yes" false-value="no" v-model="toggle"/>
+</div>
+<div id="example-10">
+    <input type="radio" v-model="picked" v-bind:value="a" id="ra"/>
+    <label for="ra">radio</label>
+</div>
+<div id="example-11">
+    <select v-model="selected">
+        <option v-bind:value="{number:123}">123</option>
+    </select>
+</div>
+<div id="example-12">
+    <!--使用lazy即表示输入之后按回车表示文本框内容改变，并非输入时及时改变-->
+    <input v-model.lazy="msg"/>
+    <br>
+    <p>Message:{{msg}}</p>
+</div>
+<div id="example-13">
+    <!--.number可以将用户输入的字符串转换成数字类型-->
+    <input v-model.number="age" type="number"/>
+    <p>{{ age}}</p>
+</div>
+<div id="example-14">
+    <!--.trim会将用户输入的字符串两边去空格赋值到vue实例的对象中-->
+    <input v-model.trim="msg" />
+</div>
+<script src="index.js"></script>
+</body>
+</html>

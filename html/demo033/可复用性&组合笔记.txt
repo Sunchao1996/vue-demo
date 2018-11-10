@@ -1,0 +1,513 @@
+混入：即将某些可以共用的东西提出来，在添加到不同的组件中。
+1.混入（mixins）是一种分发Vue组件中可复用功能的非常灵活的方式。混入对象可以包含任意组件选项。当组件使用混入对象时，所有混入对象的选项将被混入该组件本身的选项。
+例：
+    //混入基础
+    //定义一个混入对象
+    var myMixin = {
+        created:function(){
+            this.hello();
+        },
+        methods:{
+            hello:function(){
+                console.log('hello from mixin');
+            }
+        }
+    };
+    //定义一个使用混入对象的组件
+    var Component = Vue.extend({
+        mixins:[myMixin]
+    });
+
+    var component = new Component();
+
+    var vm = new Vue({
+        el:'#example-mixin',
+        components:{
+            'component-mixin':Component//相当于new
+        }
+    });
+2.选项合并：当组件和混入对象含有同名选项时，这些选项将以恰当的方式混合。Vue.extend和new Vue()有相同的合并策略。
+    比如：数据对象在内部会进行浅合并（一层属性深度），在和组件的数据发生冲突的时候以组件的数据优先。
+    例：
+        //选项合并
+        var mixin = {
+            data: function () {
+                return {
+                    message: 'hello',
+                    foo: 'abc'
+                }
+            }
+        };
+
+        new Vue({
+            mixins: [mixin],
+            data: function () {
+                return {
+                    message: 'goodbye',
+                    bar: 'def'
+                }
+            },
+            created: function () {
+                console.log(this.$data);//=》{message:'goodbye',foo:'abc',bar:'def'}
+            }
+        });
+    同名钩子函数将会进行合并，都将被调用，但是混入对象的钩子将在组件自身钩子之前调用。
+    例：
+        //钩子合并
+        var mixin = {
+            created:function(){
+                console.log('mixin created')
+            }
+        };
+        new Vue({
+            mixins:[mixin],
+            created:function(){
+                console.log('Vue created');
+            }
+        });
+        输出:mixin created
+            Vue created
+    值为对象的选项，例如 methods,components和directives(自定义指令)，将被混合为同一个对象。两个对象键名冲突时取组件对象的键值对。
+    例：
+        //值为对象的合并
+        var mixin = {
+            methods:{
+                foo:function(){
+                    console.log('foo');
+                },
+                conflicting:function(){
+                    console.log('from mixin');
+                }
+            }
+        };
+        var vm = new Vue({
+            mixins:[mixin],
+            methods:{
+                bar:function(){
+                    console.log('bar');
+                },
+                conflicting:function(){
+                    console.log('from self');
+                }
+            }
+        });
+        vm.foo();
+        vm.bar();
+        vm.conflicting();
+        输出结果：
+            foo
+            bar
+            from self
+3.全局混入：全局混入对象将会影响到所有之后创建的Vue实例。使用恰当时，可以为自定义对象注入处理逻辑。
+    例：
+        //全局混入
+        Vue.mixin({
+            created:function(){
+                var myOption = this.$options.myOption
+                if(myOption){
+                    console.log(myOption);
+                }
+            }
+        });
+
+        new Vue({
+            myOption:'hello!'//自定义选项，即为Vue本身不带的同data同级的选项
+        });
+        结果：hello!
+4,自定义的混合策略，即上一点中myOption选项的合并策略。
+    方式一：
+        可以新建一个合并函数：
+            Vue.config.optionMergeStrategies.myOption = function(toVal,fromVal){
+                //return mergedVal
+            }
+    方法二：
+        对于大多数对象选项，可以使用methods的合并策略：
+            var strategies=Vue.config.optionMergeStrategies;
+            strategies.myOption = strategies.methods;
+    高级例子如Vuex的合并策略：
+        const merge = Vue.config.optionMergeStrategies.computed
+        Vue.config.optionMergeStrategies.vuex = function (toVal, fromVal) {
+          if (!toVal) return fromVal
+          if (!fromVal) return toVal
+          return {
+            getters: merge(toVal.getters, fromVal.getters),
+            state: merge(toVal.state, fromVal.state),
+            actions: merge(toVal.actions, fromVal.actions)
+          }
+        }
+自定义组件：
+1.简介：代码复用和抽象的主要形式是组件,有的情况下，你仍然需要对普通DOM元素进行底层操作，这时候就会用到自定义指令。
+    例：
+        //全局自定义指令
+        //指定指令名v-focus
+        Vue.directive('focus', {
+            //当被绑定的元素插入到DOM中时...
+            inserted: function (el) {
+                //聚焦元素
+                el.focus();
+            }
+        });
+        var vm = new Vue({
+            el: '#example-directive'
+        });
+        //局部自定义指令
+        var vm = new Vue({
+            el:'#example-directive',
+            directives:{
+                focus:{
+                    inserted:function(el){
+                        el.focus();
+                    }
+                }
+            }
+        });
+        可以在模板中或者组件的DOM元素中使用自定义指令。
+        <input v-focus />
+2.钩子函数：即自定义指令对象中的生命周期函数。
+    如下（均为可选）：
+       ? bind:只调用一次，指令第一次绑定到元素时调用。在这里可以进行一次性的初始化设置。
+       ? inserted:被绑定元素插入父节点时调用(仅保证父节点存在，但不一定已被插入文档中)。
+        update:所在组件的VNode更新时调用，但是可能发生在其子组件VNode更新之前。指令的值可能发生了改变，也可能没有。
+                但是你可以通过比较改变前后的值来忽略不必要的更新。
+        componentUpdated：指令所在的组件和其子组件的VNode全部更新完毕之后调用。
+        unbind：指令和元素解绑时调用。
+3.钩子函数参数：全部可选
+    如下:除了el之外，其余参数都是只读的。
+        el：指令所绑定的元素，可以用来直接操作DOM。
+        binding:一个对象，包含以下属性：
+            name:指令名，不包括v-前缀
+            value:指令的绑定值，例如：v-my-directive='1 + 1',绑定值为2
+            oldValue:指令绑定值的前一个值，仅在update和componentUpdate钩子函数中可用。无论值是否改变都可用。
+            expression:字符串形式的指令表达式。例如：v-my-directive="1+1"，表达式为“1+1”.
+            arg:传给指令的参数,如：v-my-directive:foo，参数即为foo
+            modifiers:一个包含修饰符的对象,例：v-my-directive.foo.bar中，修饰符对象为：{foo:true,bar:true}
+        vnode:Vue编译生成的虚拟节点。
+        oldVnode:上一个虚拟节点，仅在update和componentUpdate钩子函数中可用。
+        例：
+            //钩子函数参数
+            Vue.directive('demo', {
+                inserted: function (el, binding, vnode) {
+                    var s = JSON.stringify;
+                    el.innerHTML =
+                        'name:' + s(binding.name) + '<br>' +
+                        'value    :' + s(binding.value) + '<br>' +
+                        'expression :' + s(binding.expression) + '<br>' +
+                        'arg :' + s(binding.arg) + '<br>' +
+                        'modifiers :' + s(binding.modifiers) + '<br>'+
+                        'vnode :'+Object.keys(vnode).join(',')+ '<br>';
+                },
+                update:function(el,binding,vnode,oldVnode){
+                    var s = JSON.stringify;
+                    el.innerHTML +='oldVnode :'+Object.keys(oldVnode).join(',')+'<br>'+
+                    'oldValue :'+s(binding.oldValue);
+                }
+            });
+            var vm = new Vue({
+                el:'#example-directive',
+                data:{
+                    data1:'111'
+                }
+            });
+4.函数简写：有的时候可能想在bind和update时触发相同的行为，而不关心其它的钩子，如下：
+    例：
+        //钩子函数bind和update简写
+        Vue.directive('demo',function(el,binding){
+            el.style.backgroundColor=binding.value;
+        });
+        var vm = new Vue({
+            el:'#example-directive',
+            data:{
+                data1:'red'
+            }
+        });
+5.对象字面量：即将一个合法的JavaScript对象传给自定义指令作为绑定值，自定义指令可以接受任何合法的JavaScript表达式。
+    例：
+        //对象字面量
+        Vue.directive('demo',function(el,binding){
+            console.log(binding.value.color);
+            console.log(binding.value.text);
+        });
+        var vm = new Vue({
+            el:'#example-directive',
+            data:{
+                data1:{color:'red',text:'message'}
+            }
+        });
+渲染函数&JSX
+1.render函数
+    例：
+        Vue.component('example-render',{
+            props:{
+                level:{
+                    type:Number,
+                    required:true
+                }
+            },
+            render:function(createElement){
+                return createElement(
+                    'h'+this.level,
+                    this.$slots.default
+                );
+            }
+        });
+        //渲染函数render
+        var vm = new Vue({
+            el:'#example-render',
+        });
+2.节点、树以及虚拟DOM
+    节点、树：
+        <div><h1>My title</h1>Some text content <!-- TODO:添加标签行 --> </div>
+        当浏览器读到这些代码时，他会建立一个DOM节点树来保持追踪，从上至下，每一行都是一个节点，一行文本，一行元素，甚至一行注释。
+    虚拟DOM：
+        Vue通过建立一个虚拟DOM对真实的DOM发生的变化保持追踪。
+        createElement参数：
+            例：
+                //createElement参数
+                var MyComponent = {
+                    props:['someProp'],
+                    template:`<p>{{this.someProp}}</p>`
+                };
+                Vue.component('example-el',{
+                    render:function(createElement){
+                        return createElement(
+                            //{String|Object|Function}一个HTML标签字符串，组件选项对象，或者解析上述任何一种的async异步函数，必选参数
+                            'div',
+                            //{Object}一个包含模板相关属性的数据对象，你可以在template中使用这些特性。可选参数
+                            {},
+                            //{String | Array}子虚拟节点，由createElement生成，也可以使用纯文本方式构成，可选参数
+                            [
+                                '文字',
+                                createElement('h1','一则头条'),
+                                createElement(MyComponent,{
+                                    props:{
+                                        someProp:'foobar'
+                                    }
+                                })
+                            ]
+                        );
+                    }
+                });
+
+                var vm = new Vue({
+                    el:'#example-el'
+                });
+            createElement第二个参数data详解：即相当于一个DOM元素中的各个特性值赋值：
+                {
+                    'class':{
+                        foo:true,
+                        bar:false
+                    },
+                    style:{
+                        color:'red',
+                        font-size:'14px'
+                    },
+                    //普通的html特性
+                    attrs:{
+                        id:'foo'
+                    },
+                    //组件的props
+                    props:{
+                        myProp:'bar'
+                    },
+                    //DOM自带的特性
+                    domProps:{
+                        innerHTML:'baz'
+                    },
+                    //普通的DOM监听事件
+                    on:{
+                        click:this.clickHandler
+                    },
+                    //仅用于监听组件的原生事件
+                    nativeOn:{
+                        click:this.nativeClickHandler
+                    },
+                    //自定义指令的赋值，除了oldValue
+                    directives:[
+                        {
+                            name:'my-custom-directive',
+                            value:'2',
+                            expression:'1 + 1',
+                            arg:'foo',
+                            modifiers:{
+                                bar:true
+                            }
+                        }
+                    ],
+                    //作用域插槽
+                    //{name:props => VNode | Array<VNode>}
+                    scopedSlots:{
+                        default:props =>createElement('span',props.text);//props为slot中的绑定的对象v-bind:td="todo"中的td
+                    },
+                    //指定插槽名称
+                    slot:'name-of-slot',
+                    //其他特殊顶层属性
+                    key:'myKey',
+                    ref:'myRef'
+                    //如果你在渲染函数中向多个元素都应用了相同的ref名，那么$refs.myRef返回的将是一个数组。
+                    refInFor:true
+                }
+                例：
+                    //createElement参数2
+                    //取出所有子节点的text拼成字符串
+                    var getChildrenTextContent = function(children){
+                        return children.map(function(node){
+                            console.log(node);
+                            return node.children ?getChildrenTextContent(node):node.text;
+                        }).join("");
+                    };
+                    Vue.component('anchored-heading', {
+                        props:{
+                            level:{
+                                type:Number
+                            }
+                        },
+                        render: function (createElement) {
+                            var headingId = getChildrenTextContent(this.$slots.default);
+                            return createElement('h' + this.level, [createElement('a',
+                                {
+                                    attrs: {
+                                        name:headingId,
+                                        href: '#' +headingId
+                                    }
+                                },this.$slots.default
+                            )]);
+                        }
+                    });
+                    var vm = new Vue({
+                        el:'#example-anchored'
+                    });
+    约束：VNodes必须唯一，组件树中的所有VNodes必须是唯一的，即不能创建一个组件对象之后，在VNodes中使用多次，
+        例：
+            无效:
+                render:function(createElement){
+                    var myParagraphVNode = createElement('p','hi');
+                    return createElement('div',[
+                        //错误，重复的VNodes
+                        myParagraphVNode,myParagraphVNode
+                    ]);
+                }
+            有效:
+                render:function(createElement){
+                    return createElement('div',Array.apply(null,{length:20}).map(function(){
+                        return crateElement('p','hi');
+                    }));
+                }
+3.使用JavaScript替代模板功能
+    v-if&v-model:
+        例:
+            //使用JavaScript替代模板功能
+            Vue.component('demo-if', {
+                props: {
+                    choose: {
+                        type: Boolean
+                    }
+                },
+                render: function (createElement) {
+                    if (this.choose) {
+                        return createElement('p', 'true');
+                    } else {
+                        return createElement('p', 'false');
+                    }
+                }
+            });
+            Vue.component('demo-model', {
+                model:{
+                    prop:'modelValue',
+                    event:'input'
+                },
+                props: {
+                    'modelValue': {
+                        type: String
+                    }
+                },
+                render: function (createElement) {
+                    var self= this;
+                    return createElement('input',
+                        {
+                            domProps:{
+                                value:this.modelValue
+                            },
+                            on:{
+                                input:function(event){
+                                    self.$emit('input',event.target.value)
+                                }
+                            }
+                        },[this,
+                        self.$slots.default
+                        ]
+                    );
+                }
+            });
+            var vm = new Vue({
+                el: '#demo-javascript',
+                data: {
+                    choose: false,
+                    modelValue: '1'
+                }
+            });
+    事件&按键修饰符:渲染函数中的事件修饰符部分可以用前缀代替模板中的修饰符，大部分直接在事件函数中使用event来控制。
+        前缀：
+            .passive     &
+            .capture     !
+            .once        ~
+            .capture.once  or .once.capture    ~!
+            例：
+                on: {
+                        '!click':this.doThisInCapturingMode
+                        '~keyup':this.doThisOnce,
+                        '~!mouseover':this.doThisOnceInCapturingMode
+                    }
+    插槽:
+        作用域插槽
+            例：
+                <div id="example-slot">
+                    <demo-slot>
+                        <h1 slot-scope="scopeProp">
+                            {{scopeProp.data.text}}
+                        </h1>
+                    </demo-slot>
+                </div>
+                //插槽
+                Vue.component('demo-slot',{
+                    data:function(){
+                        return {
+                            message:{text:'text'}
+                        }
+                    },
+                    render:function(createElement){
+                        return createElement('div',[
+                            this.$scopedSlots.default({//default表示slot的name
+                                data:this.message
+                            })
+                        ])
+                    }
+                });
+                var vm = new Vue({
+                    el:'#example-slot'
+                });
+    JSX可以简化render书写，是render更接近模板语法。
+4.过滤器：将值通过过滤器进行处理得到最后的值
+   使用：{{scopeProp.data.text | capitalize}} 通过|管道连接
+   定义：
+       全局过滤器：
+            Vue.filter('capitalize',function(value){
+                if(!value){
+                    return '';
+                }
+                value = value.toString();
+                return value.charAt(0).toUpperCase()+value.slice(1);
+            });
+       组件选项过滤器：
+            var vm = new Vue({
+                el: '#example-slot',
+                filters: {
+                    capitalize: function (value) {
+                        console.log(value);
+                        if (!value) {
+                            return '';
+                        }
+                        value = value.toString();
+                        return value.charAt(0).toUpperCase() + value.slice(1);
+                    }
+                }
+            });
