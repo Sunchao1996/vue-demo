@@ -61,7 +61,7 @@ service.interceptors.response.use(
           })
         })
       }
-      return Promise.reject('error')
+      return Promise.reject('err')
     } else {
       response.data = response.data.data;
       return response;
@@ -119,7 +119,7 @@ service.interceptors.response.use(
     if(err.response.status===401){
       router.push({path: '/401', replace: true, query: {noGoBack: true}});
     }
-    return Promise.reject(err);
+    return Promise.reject('err');
   }
 );
 

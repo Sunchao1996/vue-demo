@@ -27,11 +27,32 @@ const resourcesMap = {
       meta: {permissionName: 'ResourcesUpdate', title: 'resourcesUpdate'}
     },
     {
-      path: 'user/index',
-      name: 'User',
+      path: 'users/index',
+      name: 'Users',
       component: () => import('@/views/resources/index'),
       //permissionName为该资源的代码，如果不需要进行权限控制则为空或者不设置meta
-      meta: {title: 'user', icon: 'user', noCache: true, permissionName: 'User'}
+      meta: {title: 'users', icon: 'user', noCache: true, permissionName: 'Users'}
+    },
+    {
+      path: 'roles/index',
+      name: 'Roles',
+      component: () => import('@/views/roles/index'),
+      //permissionName为该资源的代码，如果不需要进行权限控制则为空或者不设置meta
+      meta: {title: 'roles', icon: 'role', noCache: true, permissionName: 'Roles'}
+    },
+    {
+      hidden: true,
+      path: 'roles/add',
+      component: () => import('@/views/roles/components/add'),
+      name: 'RolesAdd',
+      meta: {permissionName: 'RolesAdd', title: 'rolesAdd'}
+    },
+    {
+      hidden: true,
+      path: 'roles/update',
+      component: () => import('@/views/roles/components/update'),
+      name: 'RolesUpdate',
+      meta: {permissionName: 'RolesUpdate', title: 'rolesUpdate'}
     },
   ]
 };

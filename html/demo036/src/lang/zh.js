@@ -6,8 +6,11 @@ export default {
     dashboard: '首页',
     page401: '401',
     page404: '404',
-    user: '用户管理',
-    sysManage: '系统管理'
+    users: '用户管理',
+    sysManage: '系统管理',
+    roles: '角色管理',
+    rolesAdd: '新增角色',
+    rolesUpdate: '更新资源'
   },
   navbar: {
     logOut: '退出登录',

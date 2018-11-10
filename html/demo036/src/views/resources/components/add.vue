@@ -79,7 +79,7 @@
           ],
           resourceCode: [
             {required: true, message: '资源代码不能为空!'},
-            {validator: checkResourceCode, trigger: 'change'}
+            {validator: checkResourceCode, trigger: 'blur'}
           ]
         },
         resourcesList: [],
