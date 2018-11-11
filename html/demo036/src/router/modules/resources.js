@@ -29,7 +29,7 @@ const resourcesMap = {
     {
       path: 'users/index',
       name: 'Users',
-      component: () => import('@/views/resources/index'),
+      component: () => import('@/views/users/index'),
       //permissionName为该资源的代码，如果不需要进行权限控制则为空或者不设置meta
       meta: {title: 'users', icon: 'user', noCache: true, permissionName: 'Users'}
     },
