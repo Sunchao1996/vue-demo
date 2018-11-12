@@ -77,14 +77,14 @@
                              label="状态"
             >
               <template slot-scope="scope">
-                <el-switch
-                  style="display: block"
-                  active-color="#13ce66"
-                  v-model="scope.row.userStatusB"
-                  @change="changeStatus(scope.row.id)"
-                  inactive-color="#ff4949"
-                  active-text="正常"
-                  inactive-text="锁定">
+                <el-switch v-if="scope.row.userName!=='admin'"
+                           style="display: block"
+                           active-color="#13ce66"
+                           v-model="scope.row.userStatusB"
+                           @change="changeStatus(scope.row.id)"
+                           inactive-color="#ff4949"
+                           active-text="正常"
+                           inactive-text="锁定">
                 </el-switch>
               </template>
             </el-table-column>
@@ -93,6 +93,7 @@
                 <el-button
                   type="danger"
                   size="mini"
+                  @click.native="resetPwd(scope.row.id)"
                 >重置密码
                 </el-button>
               </template>
@@ -128,7 +129,7 @@
 </template>
 
 <script>
-  import {usersList} from '@/api/users';
+  import {usersList, usersStatusUpdate, usersResetPwd} from '@/api/users';
   import {Message, MessageBox} from 'element-ui';
 
   export default {
@@ -175,8 +176,35 @@
           this.searchData.pageSize = res.data.pageSize;
         })
       },
-      changeStatus(record) {
-        console.log(record);
+      changeStatus(recordId) {
+        usersStatusUpdate({'usid': recordId}).then(() => {
+          Message({
+            message: '操作成功~',
+            type: 'success',
+            duration: 5000
+          });
+        }).cache((err) => {
+          Message({
+            message: '操作失败~',
+            type: 'error',
+            duration: 5000
+          });
+        });
+      },
+      resetPwd(recordId) {
+        usersResetPwd({'usid': recordId}).then(() => {
+          Message({
+            message: '操作成功~',
+            type: 'success',
+            duration: 5000
+          });
+        }).cache((err) => {
+          Message({
+            message: '操作失败~',
+            type: 'error',
+            duration: 5000
+          });
+        });
       }
     }
   }
