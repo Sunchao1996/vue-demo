@@ -10,7 +10,8 @@ export default {
     sysManage: '系统管理',
     roles: '角色管理',
     rolesAdd: '新增角色',
-    rolesUpdate: '更新资源'
+    rolesUpdate: '更新资源',
+    usersAdd: '新增用户'
   },
   navbar: {
     logOut: '退出登录',

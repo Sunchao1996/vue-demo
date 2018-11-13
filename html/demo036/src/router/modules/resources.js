@@ -49,6 +49,13 @@ const resourcesMap = {
     },
     {
       hidden: true,
+      path: 'users/add',
+      component: () => import('@/views/users/components/add'),
+      name: 'UsersAdd',
+      meta: {permissionName: 'UsersAdd', title: 'usersAdd'}
+    },
+    {
+      hidden: true,
       path: 'roles/update',
       component: () => import('@/views/roles/components/update'),
       name: 'RolesUpdate',

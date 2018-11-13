@@ -36,7 +36,7 @@
       </el-col>
       <el-col :span="9">
         <el-button type="primary" @click.native="handleCurrentChange(0)">查询</el-button>
-        <el-button type="success">新增</el-button>
+        <el-button type="success" @click.native="addUser">新增</el-button>
       </el-col>
     </el-row>
     <div style="margin: 20px;"></div>
@@ -175,6 +175,11 @@
           this.searchData.pageIndex = res.data.pageIndex;
           this.searchData.pageSize = res.data.pageSize;
         })
+      },
+      addUser: function () {
+        const route = this.$route;
+        this.$router.push({name: 'UsersAdd'});
+        this.$store.dispatch('delView', route);
       },
       changeStatus(recordId) {
         usersStatusUpdate({'usid': recordId}).then(() => {

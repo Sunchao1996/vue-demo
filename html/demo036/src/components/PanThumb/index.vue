@@ -57,7 +57,7 @@ export default {
   overflow: hidden;
   position: absolute;
   transform-origin: 95% 40%;
-  transition: all 0.3s ease-in-out;
+  /*transition: all 0.3s ease-in-out;*/
 }
 
 .pan-thumb:after {

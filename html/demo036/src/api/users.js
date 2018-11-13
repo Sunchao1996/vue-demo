@@ -23,3 +23,13 @@ export function usersResetPwd(data) {
     data: data
   });
 }
+
+export function checkUserName(data) {
+  return request({
+    url: '/sys/user/checkUserCode',
+    method: 'post',
+    data: {
+      userName: data
+    }
+  });
+}
