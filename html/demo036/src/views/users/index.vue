@@ -102,6 +102,7 @@
               <template slot-scope="scope">
                 <el-button
                   size="mini"
+                  @click.native="updateUser(scope.row.id)"
                 >修改
                 </el-button>
                 <el-button v-if="scope.row.userName!=='admin'"
@@ -180,6 +181,11 @@
       addUser: function () {
         const route = this.$route;
         this.$router.push({name: 'UsersAdd'});
+        this.$store.dispatch('delView', route);
+      },
+      updateUser: function (recordId) {
+        const route = this.$route;
+        this.$router.push({name: 'UsersUpdate', params: {id: recordId}});
         this.$store.dispatch('delView', route);
       },
       delUser: function (recordId) {

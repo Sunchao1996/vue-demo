@@ -1,30 +1,52 @@
 <template>
   <div class="app-container">
     <el-row>
-      <el-col :offset="6" :span="12">
-        <el-form ref="roleUpdateForm" :label-position="labelPosition" label-width="100px" :model="formData">
-          <el-form-item label="角色名称" prop="roleName" :rules="formRules.roleName">
-            <el-input v-model="formData.roleName"></el-input>
+      <el-col :offset="5" :span="14">
+        <el-form ref="userUpdateForm" :label-position="labelPosition" label-width="100px" :model="formData">
+          <el-form-item label="用户名" prop="userName" :rules="formRules.userName">
+            <el-input v-model="formData.userName" :disabled="true"></el-input>
           </el-form-item>
-          <el-form-item label="角色代码" prop="roleCode" :rules="formRules.roleCode">
-            <el-input v-model="formData.roleCode"></el-input>
+          <el-form-item label="真实姓名" prop="userRealName" :rules="formRules.userRealName">
+            <el-input v-model="formData.userRealName"></el-input>
           </el-form-item>
           <el-form-item label="是否启用">
             <el-col :span="20">
-              <el-radio v-model="formData.roleStatus" :label="0">启用</el-radio>
-              <el-radio v-model="formData.roleStatus" :label="1">禁用</el-radio>
+              <el-radio v-model="formData.userStatus" :label="0">启用</el-radio>
+              <el-radio v-model="formData.userStatus" :label="1">禁用</el-radio>
             </el-col>
           </el-form-item>
-          <el-form-item label="角色资源">
-            <el-tree
-              :data="resourcesList"
-              show-checkbox :check-strictly="true"
-              node-key="id"
-              :default-expanded-keys="formData.checkResourcesIds"
-              :default-checked-keys="formData.checkResourcesIds"
-              :props="treeDefaultProps"
-              @check="checkResource">
-            </el-tree>
+          <el-form-item label="手机号">
+            <el-input v-model="formData.userMobile"></el-input>
+          </el-form-item>
+          <el-form-item label="头像">
+            <el-col :span="3">
+              <el-button type="primary" @click="chooseAvatar">选择</el-button>
+            </el-col>
+            <el-col :offset="1" :span="4">
+              <pan-thumb :image="formData.imgDataUrl" :width="60+'px'" :height="60+'px'"/>
+            </el-col>
+            <my-upload field="img"
+                       @crop-success="cropSuccess"
+                       v-model="avatarComponentShow"
+                       :width="200"
+                       :height="200"
+                       img-format="png"></my-upload>
+          </el-form-item>
+          <el-form-item label="简介">
+            <el-input v-model="formData.userIntroduction"></el-input>
+          </el-form-item>
+          <el-form-item label="用户角色">
+            <el-transfer
+              style="text-align: left; display: inline-block"
+              filterable
+              v-model="checkRolesId"
+              :titles="['未选中角色', '选中角色']"
+              :button-texts="['移除', '添加']"
+              :format="{noChecked:'${total}',hasChecked:'${checked}/${total}'}"
+              @change="roleChanage"
+              :data="userRolesAllId"
+            >
+            </el-transfer>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submitForm">立即更新</el-button>
@@ -37,19 +59,25 @@
 </template>
 
 <script>
-  import {getRole, checkRoleCode, updateRole} from '@/api/roles';
-  import {resourcesList} from '@/api/resources';
+  import {checkUserName, getUserById, updateUser} from '@/api/users';
+  import {rolesList} from '@/api/roles';
   import {Message} from 'element-ui';
+  import myUpload from 'vue-image-crop-upload';
+  import PanThumb from '@/components/PanThumb'
 
   export default {
-    name: "RolesAdd",
+    name: "UsersUpdate",
+    components: {
+      'my-upload': myUpload,
+      PanThumb
+    },
     data() {
       const vm = this;
-      const validRoleCode = (rule, value, callback) => {
-        if (vm.formData.oldRoleCode !== undefined && value !== vm.formData.oldRoleCode) {
-          checkRoleCode(value).then(res => {
+      const validUserName = (rule, value, callback) => {
+        if (vm.oldUserName !== undefined && value !== vm.oldUserName) {
+          checkUserName(value).then(res => {
             if (res.data === false) {
-              callback(new Error('代码已经存在'));
+              callback(new Error('用户名已经存在'));
             } else {
               callback();
             }
@@ -61,74 +89,91 @@
         }
       };
       return {
-        chooseResourceParent: false,
+        oldUserName: '',
+        formSubmit: true,
+        avatarComponentShow: false,
         labelPosition: 'right',
-        getInfoF: true,
+        checkRolesId: [],
+        userRolesAllId: [],
         formData: {
-          roleName: '',
-          roleCode: '',
-          roleStatus: 0,
-          resourcesIds: '',
-          checkResourcesIds: [],
-          oldRoleCode: ''
+          id: '',
+          userName: '',
+          userMobile: '',
+          userStatus: 0,
+          userRealName: '',
+          userAvatar: '',
+          roles: '',
+          userIntroduction: '',
+          imgDataUrl: ''
         },
         formRules: {
-          roleName: [
-            {required: true, message: '角色名称不能为空!'}
+          userName: [
+            {required: true, message: '用户名不能为空!'},
+            {validator: validUserName, trigger: 'blur'}
           ],
-          roleCode: [
-            {required: true, message: '角色代码不能为空!'},
-            {validator: validRoleCode, trigger: 'blur'}
+          userRealName: [
+            {required: true, message: '姓名不能为空!'}
           ]
-        },
-        resourcesList: [],
-        treeDefaultProps: {
-          label: 'resourceName',
-          children: 'children'
         }
       }
     },
     watch: {},
     created() {
-      resourcesList().then((res) => {
-        this.resourcesList = res.data;
-      });
-      const id = this.$route.params.id;
-      getRole(id).then((res) => {
-        this.formData = Object.assign({}, this.formData, res.data);
-        this.formData.oldRoleCode = this.formData.roleCode;
-        this.formData.checkResourcesIds = res.data.resourcesIds.split('@');
-      }).catch(error => {
+      //获取角色列表
+      rolesList({}).then((res) => {
+        this.formSubmit = true;
+        for (let i of res.data) {
+          this.userRolesAllId.push({
+            key: '' + i.id,
+            label: i.roleName
+          })
+        }
+        //获取用户
+        const userId = this.$route.params.id;
+        getUserById(userId).then((res) => {
+          this.formSubmit = true;
+          this.formData = Object.assign({}, this.formData, res.data);
+          this.formData.imgDataUrl = this.formData.userAvatar;
+          this.oldUserName = this.formData.userName;
+          //获取拥有的角色id
+          this.checkRolesId = this.formData.roles.split('@');
+        }).catch(() => {
+          this.formSubmit = false;
+        });
+      }).catch(() => {
+        this.formSubmit = false;
         Message({
+          message: '获取角色列表失败',
           type: 'error',
-          message: '获取数据错误~',
           duration: 5000
         });
-        this.getInfoF = false;
       });
+
     },
     methods: {
+      cropSuccess: function (imgDataUrl, field) {
+        this.formData.userAvatar = imgDataUrl;
+        this.formData.imgDataUrl = imgDataUrl;
+      },
+      chooseAvatar: function () {
+        this.avatarComponentShow = true;
+      },
       goBack: function () {
         this.$router.go(-1);
       },
       submitForm() {
-        console.log("submit");
-        this.$refs['roleUpdateForm'].validate((valid) => {
-          console.log(valid);
-          if (valid && this.getInfoF) {
-            this.formData.resourcesIds = this.formData.checkResourcesIds.join('@');
-            updateRole(this.formData).then(() => {
-              this.$router.replace({name: 'Roles'});
-            }).catch(error => {
-              console.log('更新角色失败');
+        this.$refs['userUpdateForm'].validate((valid) => {
+          if (valid && this.formSubmit) {
+            updateUser(this.formData).then(() => {
+              this.$router.replace({name: 'Users'});
+            }).catch(() => {
+              console.log('修改用户失败');
             });
-          } else {
           }
         });
       },
-      checkResource(data, c) {
-        this.formData.checkResourcesIds = c.checkedKeys;
-        console.log(this.formData.checkResourcesIds);
+      roleChanage(cur, lr, key) {
+        this.formData.roles = this.checkRolesId.join("@");
       }
     }
   }

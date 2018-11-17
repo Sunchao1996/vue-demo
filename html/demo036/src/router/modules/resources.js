@@ -61,6 +61,13 @@ const resourcesMap = {
       name: 'RolesUpdate',
       meta: {permissionName: 'RolesUpdate', title: 'rolesUpdate'}
     },
+    {
+      hidden: true,
+      path: 'users/update',
+      component: () => import('@/views/users/components/update'),
+      name: 'UsersUpdate',
+      meta: {permissionName: 'UsersUpdate', title: 'usersUpdate'}
+    }
   ]
 };
 export default resourcesMap;

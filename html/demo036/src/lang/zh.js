@@ -11,7 +11,8 @@ export default {
     roles: '角色管理',
     rolesAdd: '新增角色',
     rolesUpdate: '更新资源',
-    usersAdd: '新增用户'
+    usersAdd: '新增用户',
+    usersUpdate: '更新用户'
   },
   navbar: {
     logOut: '退出登录',

@@ -3,8 +3,8 @@
     <el-row>
       <el-col :offset="6" :span="12">
         <el-form ref="roleUpdateForm" :label-position="labelPosition" label-width="100px" :model="formData">
-          <el-form-item label="角色名称" prop="roleName" :rules="formRules.roleName">
-            <el-input v-model="formData.roleName"></el-input>
+          <el-form-item label="角色名称" prop="roleName" :rules="formRules.roleName" >
+            <el-input v-model="formData.roleName" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="角色代码" prop="roleCode" :rules="formRules.roleCode">
             <el-input v-model="formData.roleCode"></el-input>

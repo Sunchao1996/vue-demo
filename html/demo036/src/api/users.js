@@ -51,3 +51,21 @@ export function deleteUser(id) {
     }
   });
 }
+
+export function getUserById(id) {
+  return request({
+    url: '/sys/user/getById',
+    method: 'post',
+    data: {
+      id: id
+    }
+  });
+}
+
+export function updateUser(data) {
+  return request({
+    url: '/sys/user/updateUser',
+    method: 'post',
+    data: data
+  });
+}
