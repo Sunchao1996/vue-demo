@@ -77,7 +77,7 @@
                              label="状态"
             >
               <template slot-scope="scope">
-                <el-switch v-if="scope.row.userName!=='admin'"
+                <el-switch v-if="scope.row.userName!=='admin' && scope.row.userName !==$store.getters.name"
                            style="display: block"
                            active-color="#13ce66"
                            v-model="scope.row.userStatusB"
@@ -107,6 +107,7 @@
                 <el-button v-if="scope.row.userName!=='admin'"
                            size="mini"
                            type="danger"
+                           @click.native="delUser(scope.row.id)"
                 >删除
                 </el-button>
               </template>
@@ -129,7 +130,7 @@
 </template>
 
 <script>
-  import {usersList, usersStatusUpdate, usersResetPwd} from '@/api/users';
+  import {usersList, usersStatusUpdate, usersResetPwd, deleteUser} from '@/api/users';
   import {Message, MessageBox} from 'element-ui';
 
   export default {
@@ -181,6 +182,23 @@
         this.$router.push({name: 'UsersAdd'});
         this.$store.dispatch('delView', route);
       },
+      delUser: function (recordId) {
+        MessageBox.confirm('是否删除用户?', '删除', {
+          callback: (action, instance) => {
+            if (action === 'confirm') {
+              deleteUser(recordId).then(() => {
+                this.$router.replace({path: '/sys/users/index', query: {v: (new Date()).getTime()}});
+              }).catch(() => {
+                Message({
+                  message: '操作失败',
+                  type: 'error',
+                  duration: 5000
+                });
+              });
+            }
+          }
+        });
+      },
       changeStatus(recordId) {
         usersStatusUpdate({'usid': recordId}).then(() => {
           Message({
@@ -188,7 +206,7 @@
             type: 'success',
             duration: 5000
           });
-        }).cache((err) => {
+        }).catch((err) => {
           Message({
             message: '操作失败~',
             type: 'error',
@@ -203,7 +221,7 @@
             type: 'success',
             duration: 5000
           });
-        }).cache((err) => {
+        }).catch((err) => {
           Message({
             message: '操作失败~',
             type: 'error',

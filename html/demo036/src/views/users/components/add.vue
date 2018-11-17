@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-row>
-      <el-col :offset="6" :span="12">
+      <el-col :offset="5" :span="14">
         <el-form ref="userAddForm" :label-position="labelPosition" label-width="100px" :model="formData">
           <el-form-item label="用户名" prop="userName" :rules="formRules.userName">
             <el-input v-model="formData.userName"></el-input>
@@ -19,8 +19,12 @@
             <el-input v-model="formData.userMobile"></el-input>
           </el-form-item>
           <el-form-item label="头像">
-            <pan-thumb :image="formData.imgDataUrl"/>
-            <el-button type="primary" @click="chooseAvatar">选择</el-button>
+            <el-col :span="3">
+              <el-button type="primary" @click="chooseAvatar">选择</el-button>
+            </el-col>
+            <el-col :offset="1" :span="4">
+              <pan-thumb :image="formData.imgDataUrl" :width="60+'px'" :height="60+'px'"/>
+            </el-col>
             <my-upload field="img"
                        @crop-success="cropSuccess"
                        v-model="avatarComponentShow"
@@ -32,6 +36,17 @@
             <el-input v-model="formData.userIntroduction"></el-input>
           </el-form-item>
           <el-form-item label="用户角色">
+            <el-transfer
+              style="text-align: left; display: inline-block"
+              filterable
+              v-model="checkRolesId"
+              :titles="['未选中角色', '选中角色']"
+              :button-texts="['移除', '添加']"
+              :format="{noChecked:'${total}',hasChecked:'${checked}/${total}'}"
+              @change="roleChanage"
+              :data="userRolesAllId"
+            >
+            </el-transfer>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submitForm">立即创建</el-button>
@@ -44,10 +59,12 @@
 </template>
 
 <script>
-  import {addRole, checkUserName} from '@/api/users';
+  import {addRole, checkUserName, saveUser} from '@/api/users';
+  import {rolesList} from '@/api/roles';
   import {Message} from 'element-ui';
   import myUpload from 'vue-image-crop-upload';
   import PanThumb from '@/components/PanThumb'
+
   export default {
     name: "UsersAdd",
     components: {
@@ -67,8 +84,11 @@
         });
       };
       return {
+        formSubmit: true,
         avatarComponentShow: false,
         labelPosition: 'right',
+        checkRolesId: [],
+        userRolesAllId: [],
         formData: {
           userName: '',
           userMobile: '',
@@ -77,7 +97,6 @@
           userAvatar: '',
           roles: '',
           userIntroduction: '',
-          checkRolesIds: [],
           imgDataUrl: ''
         },
         formRules: {
@@ -93,9 +112,26 @@
     },
     watch: {},
     created() {
+      rolesList({}).then((res) => {
+        this.formSubmit = true;
+        for (let i of res.data) {
+          this.userRolesAllId.push({
+            key: i.id,
+            label: i.roleName
+          })
+        }
+      }).catch(() => {
+        this.formSubmit = false;
+        Message({
+          message: '获取角色列表失败',
+          type: 'error',
+          duration: 5000
+        });
+      });
     },
     methods: {
-      cropSuccess:function(imgDataUrl, field){
+      cropSuccess: function (imgDataUrl, field) {
+        this.formData.userAvatar = imgDataUrl;
         this.formData.imgDataUrl = imgDataUrl;
       },
       chooseAvatar: function () {
@@ -106,9 +142,21 @@
       },
       submitForm() {
         this.$refs['userAddForm'].validate((valid) => {
-          if (valid) {
+          if (valid && this.formSubmit) {
+            saveUser(this.formData).then((res) => {
+              this.$router.replace({name: 'Users'});
+            }).catch(() => {
+              // Message({
+              //   message: '操作失败',
+              //   type: 'error',
+              //   duration: 5000
+              // });
+            });
           }
         });
+      },
+      roleChanage(cur, lr, key) {
+        this.formData.roles = this.checkRolesId.join("@");
       }
     }
   }

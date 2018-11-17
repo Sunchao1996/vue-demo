@@ -33,3 +33,21 @@ export function checkUserName(data) {
     }
   });
 }
+
+export function saveUser(data) {
+  return request({
+    url: '/sys/user/addUser',
+    method: 'post',
+    data
+  });
+}
+
+export function deleteUser(id) {
+  return request({
+    url: '/sys/user/deleteUser',
+    method: 'post',
+    data: {
+      id: id
+    }
+  });
+}
