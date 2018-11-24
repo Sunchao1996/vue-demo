@@ -59,10 +59,15 @@ const webpackConfig = merge(baseWebpackConfig, {
       templateParameters: {
         BASE_URL: config.build.assetsPublicPath + config.build.assetsSubDirectory,
       },
+      //压缩缩小，
       minify: {
+        //去除注释
         removeComments: true,
+        //取出空格
         collapseWhitespace: true,
+        //去除引号
         removeAttributeQuotes: true
+        //去除空属性  removeEmptyAttribute:true
         // more options:
         // https://github.com/kangax/html-minifier#options-quick-reference
       }

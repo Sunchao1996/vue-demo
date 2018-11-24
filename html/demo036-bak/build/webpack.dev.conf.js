@@ -28,6 +28,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   devtool: config.dev.devtool,
 
   // these devServer options should be customized in /config/index.js
+  //TODO webpack-dev-server本地服务器
   devServer: {
     clientLogLevel: 'warning',
     historyApiFallback: true,
@@ -54,6 +55,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
+      //包含模板内容
       template: 'index.html',
       inject: true,
       favicon: resolve('favicon.ico'),

@@ -20,7 +20,6 @@ function hasPermission(resources, route) {
  */
 function filterAsyncRouter(routes, resources) {
   const res = [];
-
   routes.forEach(route => {
     const tmp = {...route};
     if (hasPermission(resources, tmp)) {

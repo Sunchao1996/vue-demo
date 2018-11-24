@@ -28,8 +28,8 @@
             <my-upload field="img"
                        @crop-success="cropSuccess"
                        v-model="avatarComponentShow"
-                       :width="200"
-                       :height="200"
+                       :width="50"
+                       :height="50"
                        img-format="png"></my-upload>
           </el-form-item>
           <el-form-item label="简介">

@@ -2,7 +2,7 @@
 const path = require('path');
 const utils = require('./utils');
 const config = require('../config');
-const { VueLoaderPlugin } = require('vue-loader');
+const {VueLoaderPlugin} = require('vue-loader');
 const vueLoaderConfig = require('./vue-loader.conf');
 
 function resolve(dir) {
@@ -22,9 +22,11 @@ const createLintingRule = () => ({
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
+  //压缩文件入口
   entry: {
     app: './src/main.js'
   },
+  //输出位置
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',

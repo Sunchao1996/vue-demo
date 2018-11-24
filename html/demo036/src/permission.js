@@ -10,9 +10,20 @@ NProgress.configure({showSpinner: false});// NProgress Configuration
 // permission judge function
 function hasPermission(rolesResources, route) {
   if (rolesResources.roles.indexOf('admin') >= 0) return true; // admin permission passed directly
-  if (!route.meta || route.meta.permissionName === undefined) return true;
-
-  return rolesResources.resources.indexOf(route.meta.permissionName) > -1;
+  if (route.name === undefined) {
+    return true;
+  } else {
+    if (route.meta === {}) {
+      for (let temp of store.getters.permission_routers) {
+        if (temp.name !== undefined && temp.name === route.name) {
+          return true;
+        }
+      }
+      return false;
+    }else{
+      return rolesResources.resources.indexOf(route.meta.permissionName) > -1;
+    }
+  }
 }
 
 const whiteList = ['/login', '/auth-redirect'];// no redirect whitelist
@@ -41,10 +52,12 @@ router.beforeEach((to, from, next) => {
           })
         })
       } else {
+        console.log("userinfo now");
+        console.log(to);
         // 没有动态改变权限的需求可直接next() 删除下方权限判断 ↓
         const roles = store.getters.roles;
         const resources = store.getters.resources;
-        console.log(resources);
+
         if (hasPermission({roles, resources}, to)) {
           next()
         } else {
