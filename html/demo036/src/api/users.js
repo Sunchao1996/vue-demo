@@ -69,3 +69,11 @@ export function updateUser(data) {
     data: data
   });
 }
+
+export function updateUserPwd(data) {
+  return request({
+    url: '/sys/user/updateUserPwd',
+    method: 'post',
+    data: data
+  });
+}

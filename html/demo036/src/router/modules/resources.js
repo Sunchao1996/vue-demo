@@ -67,6 +67,13 @@ const resourcesMap = {
       component: () => import('@/views/users/components/update'),
       name: 'UsersUpdate',
       meta: {permissionName: 'UsersUpdate', title: 'usersUpdate'}
+    },
+    {
+      hidden: true,
+      path: 'users/updatePwd',
+      component: () => import('@/views/users/components/updatePwd'),
+      name: 'UsersUpdatePwd',
+      meta: {title: 'usersUpdatePwd'}
     }
   ]
 };

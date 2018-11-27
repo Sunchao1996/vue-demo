@@ -14,7 +14,9 @@ const user = {
     setting: {
       articlePlatform: []
     },
-    resources: ''
+    resources: '',
+    roleName: [],
+    userRealName: ''
   },
 
   mutations: {
@@ -44,6 +46,12 @@ const user = {
     },
     SET_RESOURCES: (state, resources) => {
       state.resources = resources;
+    },
+    SET_USERREALNAME: (state, userRealName) => {
+      state.userRealName = userRealName;
+    },
+    SET_ROLENAME: (state, roleName) => {
+      state.roleName = roleName;
     }
   },
 
@@ -74,7 +82,7 @@ const user = {
 
           if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
             commit('SET_ROLES', data.roles);
-            commit('SET_RESOURCES', data.resources===null?'':data.resources);
+            commit('SET_RESOURCES', data.resources === null ? '' : data.resources);
           } else {
             reject('getInfo: roles must be a non-null array !')
           }
@@ -82,6 +90,8 @@ const user = {
           commit('SET_NAME', data.name);
           commit('SET_AVATAR', data.avatar);
           commit('SET_INTRODUCTION', data.introduction);
+          commit('SET_USERREALNAME', data.userRealName);
+          commit('SET_ROLENAME', data.roleName);
           resolve(response)
         }).catch(error => {
           reject(error)

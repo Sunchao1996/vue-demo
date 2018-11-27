@@ -1,14 +1,20 @@
 <template>
   <div class="dashboard-editor-container">
     <div class=" clearfix">
-      <pan-thumb :image="avatar" style="float: left"> Your roles:
-        <span v-for="item in roles" :key="item" class="pan-info-roles">{{ item }}</span>
+      <pan-thumb :image="avatar" style="float: left"> 拥有角色:
+        <span v-for="item in roleName" :key="item" class="pan-info-roles">{{ item }}</span>
       </pan-thumb>
-      <github-corner style="position: absolute; top: 0px; border: 0; right: 0;"/>
       <div class="info-container">
-        <span class="display_name">{{ name }}</span>
-        <span style="font-size:20px;padding-top:20px;display:inline-block;">Editor's Dashboard</span>
+        <span class="display_name">{{ userRealName }}</span>
+        <span style="font-size:20px ;display:inline-block;">
+
+        </span>
       </div>
+    </div>
+    <div style="padding-top: 10px;">
+      <router-link style="padding-top:12px;padding-left:45px;height: 40px;width:150px" class="pan-btn green-btn"
+                   :to="{path:'sys/users/updatePwd'}">修改密码
+      </router-link>
     </div>
     <div>
       <img :src="emptyGif" class="emptyGif">
@@ -17,26 +23,32 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import PanThumb from '@/components/PanThumb'
-import GithubCorner from '@/components/GithubCorner'
+  import {mapGetters} from 'vuex'
+  import PanThumb from '@/components/PanThumb'
 
-export default {
-  name: 'DashboardEditor',
-  components: { PanThumb, GithubCorner },
-  data() {
-    return {
-      emptyGif: 'https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3'
+  export default {
+    name: 'DashboardEditor',
+    components: {PanThumb},
+    data() {
+      return {
+        roleName: [],
+        emptyGif: 'https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3'
+      }
+    },
+    computed: {
+      ...mapGetters([
+        'name',
+        'avatar',
+        'roles',
+        'userRealName'
+      ])
+    },
+    created: function () {
+      let roleNameTemp = this.$store.getters.roleName;
+      roleNameTemp = roleNameTemp.substring(0, roleNameTemp.length - 1);
+      this.roleName = roleNameTemp.split('@');
     }
-  },
-  computed: {
-    ...mapGetters([
-      'name',
-      'avatar',
-      'roles'
-    ])
   }
-}
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
