@@ -41,10 +41,7 @@
         } else {
           callback(new Error('两次输入密码不一致!'));
         }
-      };userName: '',
-        userPwd: '',
-        newUserPwd: '',
-        sureNewUserPwd: ''
+      };
       let checkNewPwd = function (rule, value, callback) {
         if (vm.passwordLengthValid) {
           callback();
@@ -57,7 +54,10 @@
         labelPosition: 'right',
         passwordLengthValid: false,
         formData: {
-          ,
+          userName: '',
+          userPwd: '',
+          newUserPwd: '',
+          sureNewUserPwd: '',
         },
         formRules: {
           userPwd: [
