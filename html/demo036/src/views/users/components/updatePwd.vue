@@ -7,13 +7,13 @@
             <el-input v-model="formData.userName" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="原密码" prop="userPwd" :rules="formRules.userPwd">
-            <el-input v-model="formData.userPwd"></el-input>
+            <el-input type="password" v-model="formData.userPwd"></el-input>
           </el-form-item>
           <el-form-item label="新密码" prop="newUserPwd" :rules="formRules.newUserPwd">
-            <el-input v-model="formData.newUserPwd"></el-input>
+            <pwd-input @save-pwd="savePwd"></pwd-input>
           </el-form-item>
           <el-form-item label="确认新密码" prop="sureNewUserPwd" :rules="formRules.sureNewUserPwd">
-            <el-input v-model="formData.sureNewUserPwd"></el-input>
+            <el-input type="password" v-model="formData.sureNewUserPwd"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submitForm">立即修改</el-button>
@@ -27,26 +27,52 @@
 
 <script>
   import {updateUserPwd} from '@/api/users';
-  import {Message} from 'element-ui';
+  import {Message, MessageBox} from 'element-ui';
+  import PwdInput from '@/components/PwdInput';
 
   export default {
     name: "UsersUpdatePwd",
+    components: {'pwd-input': PwdInput},
     data() {
+      const vm = this;
+      let checkNewPwdSure = function (rule, value, callback) {
+        if (vm.formData.newUserPwd !== '' && vm.formData.newUserPwd === value) {
+          callback();
+        } else {
+          callback(new Error('两次输入密码不一致!'));
+        }
+      };userName: '',
+        userPwd: '',
+        newUserPwd: '',
+        sureNewUserPwd: ''
+      let checkNewPwd = function (rule, value, callback) {
+        if (vm.passwordLengthValid) {
+          callback();
+        } else {
+          callback(new Error('新密码应该包含大写字母+小写字母+数字！'));
+        }
+      };
       return {
         formSubmit: true,
         labelPosition: 'right',
+        passwordLengthValid: false,
         formData: {
-          userName: '',
-          userPwd: '',
-          newUserPwd: '',
-          sureNewUserPwd: '',
+          ,
         },
         formRules: {
           userPwd: [
             {required: true, message: '原密码不能为空!'}
           ],
-          newUserPwd: [{required: true, message: '新密码不能为空!'}],
-          sureNewUserPwd: [{required: true, message: '新密码不能为空!'}]
+          newUserPwd: [
+            {required: true, message: '新密码不能为空!'},
+            {min: 6, message: '新密码至少六位', trigger: 'blur'},
+            {validator: checkNewPwd, trigger: 'change'}
+          ],
+          sureNewUserPwd: [
+            {required: true, message: '新密码不能为空!'},
+            {min: 6, message: '新密码至少六位', trigger: 'blur'},
+            {validator: checkNewPwdSure, trigger: 'change'}
+          ]
         }
       }
     },
@@ -61,7 +87,30 @@
       },
       submitForm() {
         this.$refs['userUpdatePwdForm'].validate((valid) => {
+          if (valid) {
+            MessageBox.confirm('是否确认修改密码?', '提示', {
+              callback: (action, instance) => {
+                if (action === 'confirm') {
+                  updateUserPwd(this.formData).then(() => {
+                    this.$store.dispatch('LogOut').then(() => {
+                      location.reload()// In order to re-instantiate the vue-router object to avoid bugs
+                    })
+                  }).catch(() => {
+                    Message({
+                      message: '密码修改失败',
+                      type: 'error',
+                      duration: 5000
+                    });
+                  });
+                }
+              }
+            });
+          }
         });
+      },
+      savePwd: function (pwd, vp, vl) {
+        this.formData.newUserPwd = pwd;
+        this.passwordLengthValid = vp;
       }
     }
   }
